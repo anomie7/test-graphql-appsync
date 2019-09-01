@@ -4,6 +4,8 @@
     <button @click="next">next</button>
     <input type="text" v-model="titleKeyword">
     <button @click="search">search</button>
+    
+    글 개수 : <input type="number" v-model="limit">
     <div>
       
     <table>
@@ -20,10 +22,10 @@
     
     <div style="border: 1px solid black;margin-top: 14px">
       selected blog
-      <ul v-if="getBlog != null">
-        <li style="display:block">{{getBlog.title}}</li>
-        <li style="display:block">{{getBlog.content}}</li>
-        <li style="display:block">{{getBlog.rating}}</li>
+      <ul v-if="selectedBlog != null">
+        <li style="display:block">{{selectedBlog.title}}</li>
+        <li style="display:block">{{selectedBlog.content}}</li>
+        <li style="display:block">{{selectedBlog.rating}}</li>
       </ul>
     </div>
 
@@ -61,6 +63,7 @@ export default {
       searchFilter: null,
       getBlog: {},
       listBlogs: {},
+      selectedBlog: {},
       nextToken: '',
       addedBlog: {
         title: '',
@@ -176,8 +179,16 @@ export default {
           console.log(data)}
       }
     },
-    getBlog: {
+    selectedBlog: {
       query: getBlog,
+      update(data){
+        return data.getBlog
+      },
+      // result({data, loading, networkStatus}){
+      //   this.selectedBlog = data.getBlog;
+      //   this.getBlog = data.getBlog;
+      //   console.log(data.getBlog)
+      // },
       variables(){
         return {
            id: this.selectedId
