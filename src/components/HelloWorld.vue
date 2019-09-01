@@ -135,14 +135,23 @@ export default {
         this.$apollo.mutate({
           mutation: EDIT_BLOG,
           variables: {
-            id: this.getBlog.id,
+            id: this.selectedBlog.id,
             title: this.addedBlog.title,
             content: this.addedBlog.content,
             rating: this.addedBlog.rating,
             approved: true
           },
           update: (store, {data: {updateBlog}}) => {
+            const selectedBlog = {
+              query: getBlog,
+              variables: {
+                id : this.selectedId
+              }
+            }
 
+            const data = store.readQuery(selectedBlog);
+            data.getBlog = updateBlog
+            store.writeQuery({...selectedBlog, data})
           },
           optimisticResponse: {
             __typename: 'Mutation',
