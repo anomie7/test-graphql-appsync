@@ -1,17 +1,31 @@
 import gql from "graphql-tag";
 
 const listBlogs = gql`
-  query getBlogList($limit: Int) {
-    listBlogs(limit: $limit) {
+  query getBlogList(
+    $filter: TableBlogFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listBlogs(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
         title
-        content
-        rating
       }
       nextToken
     }
   }
 `;
 
-export default listBlogs;
+const getBlog = gql`
+  query getBlog($id: ID!) {
+    getBlog(id: $id) {
+      id
+      title
+      content
+      rating
+      approved
+    }
+  }
+`;
+
+export { listBlogs, getBlog };

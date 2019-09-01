@@ -1,28 +1,70 @@
 <template>
-  <div class="hello">
-    <button v-on:click="click">{{msg}}</button>
-    <button @click="plus">plus</button>
+  <div class="">
+    <button @click="pre">pre</button>
+    <button @click="next">next</button>
+    <input type="text" v-model="titleKeyword">
+    <button @click="search">search</button>
+    <div>
+      
+    <table>
+      <th>
+        <td>index</td>
+        <td>title</td>
+      </th>
+      <tr v-for="(blog, index) in listBlogs.items" :key="blog.id">
+        <td>{{index}}</td>
+        <td @click="selectedTitle(index)">{{blog.title}}</td>
+      </tr>
+    </table>
+    </div>
+    
+    <div style="border: 1px solid black;margin-top: 14px">
+      selected blog
+      <ul v-if="getBlog != null">
+        <li style="display:block">{{getBlog.title}}</li>
+        <li style="display:block">{{getBlog.content}}</li>
+        <li style="display:block">{{getBlog.rating}}</li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script>
-import listBlogs from "@/graphql/queryBlog";
+import {listBlogs} from "@/graphql/queryBlog";
+import {getBlog} from "@/graphql/queryBlog";
 
 export default {
   name: "HelloWorld",
   data() {
     return {
-      limit: 1
+      limit: 5,
+      selectedId: '1',
+      previousBlogs: new Array(),
+      titleKeyword: '',
+      titleFilter: {title: {contains: null} },
+      searchFilter: null,
+      getBlog: {},
+      listBlogs: {},
+      nextToken: ''
     };
   },
   methods: {
-    click() {
-      this.listBlogs.items.forEach(element => {
-        console.log(element.id);
-      });
+    pre(){
+      //this.$apollo.queries.tagsPage.fetchMore
     },
-    plus() {
-      this.limit++;
+    next() {
+      this.previousBlogs.push(...this.listBlogs.items);
+      this.nextToken = this.listBlogs.nextToken;
+    },
+    search(){
+      if(this.titleKeyword == ""){
+        this.searchFilter = null;
+      }else{
+        this.searchFilter = {title: {contains: this.titleKeyword}}
+      }
+    },
+    selectedTitle(index){
+      this.selectedId = this.listBlogs.items[index].id;
     }
   },
   apollo: {
@@ -30,8 +72,18 @@ export default {
       query: listBlogs,
       variables() {
         return {
-          limit: this.limit
+          filter: this.searchFilter,
+          limit: this.limit,
+          nextToken: this.nextToken
         };
+      }
+    },
+    getBlog: {
+      query: getBlog,
+      variables(){
+        return {
+           id: this.selectedId
+        }
       }
     }
   },
