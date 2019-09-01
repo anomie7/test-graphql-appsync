@@ -35,12 +35,10 @@
       <textarea v-model="addedBlog.content"></textarea><br>
       추천 점수
       <input type="number" v-model="addedBlog.rating">
-      <button @click="addBlog">추가</button>
     </div>
 
-    <div style="margin-top: 60px">
+      <button @click="addBlog">추가</button>
       <button @click="editBlog">수정</button>
-    </div>
   </div>
 </template>
 
@@ -133,10 +131,10 @@ export default {
           mutation: EDIT_BLOG,
           variables: {
             id: this.getBlog.id,
-            title: 'this.getBlog.title',
-            content: 'this.getBlog.content',
-            rating: 33.3,
-            approved: false
+            title: this.addedBlog.title,
+            content: this.addedBlog.content,
+            rating: this.addedBlog.rating,
+            approved: true
           },
           update: (store, {data: {updateBlog}}) => {
 
