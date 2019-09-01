@@ -26,12 +26,24 @@
         <li style="display:block">{{getBlog.rating}}</li>
       </ul>
     </div>
+
+    <div style="margin-top: 50px">
+      블로그 글 추가<br>
+      제목
+      <input type="text" v-model="addedBlog.title"><br>
+      본문
+      <textarea v-model="addedBlog.content"></textarea><br>
+      추천 점수
+      <input type="number" v-model="addedBlog.rating">
+      <button @click="addBlog">추가</button>
+    </div>
   </div>
 </template>
 
 <script>
-import {listBlogs} from "@/graphql/queryBlog";
+import {LIST_BLOGS} from "@/graphql/queryBlog";
 import {getBlog} from "@/graphql/queryBlog";
+import createBlog from "@/graphql/createBlog"
 
 export default {
   name: "HelloWorld",
@@ -45,7 +57,12 @@ export default {
       searchFilter: null,
       getBlog: {},
       listBlogs: {},
-      nextToken: ''
+      nextToken: '',
+      addedBlog: {
+        title: '',
+        content: '',
+        rating: 0.0
+      }
     };
   },
   methods: {
@@ -65,11 +82,52 @@ export default {
     },
     selectedTitle(index){
       this.selectedId = this.listBlogs.items[index].id;
+    },
+    addBlog(){
+      const newBlog = this.addedBlog;
+      this.addedBlog = {
+        title: '',
+        content: '',
+        rating: 0.0
+      };
+        this.$apollo.mutate({
+          mutation: createBlog,
+          variables: {
+            id: -1,
+            title: newBlog.title,
+            content: newBlog.content,
+            rating: newBlog.rating,
+          },
+          update: (store, { data: { createBlog }}) => {
+            const allBlogs = {
+              query: LIST_BLOGS,
+              variables: {filter: null, limit: 5, nextToken: null}
+            }
+            const data = store.readQuery(allBlogs)
+            data.listBlogs.items.push(createBlog)
+            store.writeQuery({...allBlogs, data})
+          },
+          optimisticResponse: {
+            __typename: 'Mutation',
+            createBlog : {
+              __typename: 'Blog',
+              id: -1,
+              title: '',
+              content: '',
+              approved: true,
+              rating: 0
+            }
+          }
+        }).then((data) => {
+            console.log(data)
+        }).catch((error) => {
+          console.log(error)
+        })
     }
   },
   apollo: {
     listBlogs: {
-      query: listBlogs,
+      query: LIST_BLOGS,
       variables() {
         return {
           filter: this.searchFilter,
@@ -97,14 +155,6 @@ export default {
 <style scoped>
 h3 {
   margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
 }
 a {
   color: #42b983;

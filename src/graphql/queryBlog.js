@@ -1,6 +1,6 @@
 import gql from "graphql-tag";
 
-const listBlogs = gql`
+const LIST_BLOGS = gql`
   query getBlogList(
     $filter: TableBlogFilterInput
     $limit: Int
@@ -28,4 +28,4 @@ const getBlog = gql`
   }
 `;
 
-export { listBlogs, getBlog };
+export { LIST_BLOGS, getBlog };
