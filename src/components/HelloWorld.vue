@@ -37,11 +37,16 @@
       <input type="number" v-model="addedBlog.rating">
       <button @click="addBlog">추가</button>
     </div>
+
+    <div style="margin-top: 60px">
+      <button @click="editBlog">수정</button>
+    </div>
   </div>
 </template>
 
 <script>
 import {LIST_BLOGS} from "@/graphql/queryBlog";
+import EDIT_BLOG from "@/graphql/editBlog";
 import {getBlog} from "@/graphql/queryBlog";
 import createBlog from "@/graphql/createBlog"
 
@@ -93,7 +98,6 @@ export default {
         this.$apollo.mutate({
           mutation: createBlog,
           variables: {
-            id: -1,
             title: newBlog.title,
             content: newBlog.content,
             rating: newBlog.rating,
@@ -120,6 +124,36 @@ export default {
           }
         }).then((data) => {
             console.log(data)
+        }).catch((error) => {
+          console.log(error)
+        })
+    },
+    editBlog(){
+        this.$apollo.mutate({
+          mutation: EDIT_BLOG,
+          variables: {
+            id: this.getBlog.id,
+            title: 'this.getBlog.title',
+            content: 'this.getBlog.content',
+            rating: 33.3,
+            approved: false
+          },
+          update: (store, {data: {updateBlog}}) => {
+
+          },
+          optimisticResponse: {
+            __typename: 'Mutation',
+            updateBlog : {
+              __typename: 'Blog',
+              id: -1,
+              title: '',
+              content: '',
+              approved: true,
+              rating: 0
+            }
+          }
+        }).then((data) => {
+          console.log(data)
         }).catch((error) => {
           console.log(error)
         })
