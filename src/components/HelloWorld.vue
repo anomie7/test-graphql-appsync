@@ -45,6 +45,7 @@
 <script>
 import {LIST_BLOGS} from "@/graphql/queryBlog";
 import EDIT_BLOG from "@/graphql/editBlog";
+import ON_CREATE_BLOG from "@/graphql/onCreateBlog";
 import {getBlog} from "@/graphql/queryBlog";
 import createBlog from "@/graphql/createBlog"
 
@@ -121,6 +122,7 @@ export default {
             }
           }
         }).then((data) => {
+            console.log('addBLog success')
             console.log(data)
         }).catch((error) => {
           console.log(error)
@@ -166,6 +168,12 @@ export default {
           limit: this.limit,
           nextToken: this.nextToken
         };
+      },
+      subscribeToMore: {
+        document: ON_CREATE_BLOG,
+        result: (data) => { 
+          console.log('subscription create blog')
+          console.log(data)}
       }
     },
     getBlog: {
