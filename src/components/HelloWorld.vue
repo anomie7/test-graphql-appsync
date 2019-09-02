@@ -13,7 +13,7 @@
         <td>index</td>
         <td>title</td>
       </th>
-      <tr v-for="(blog, index) in currentBlogs" :key="blog.id">
+      <tr v-for="(blog, index) in listBlogs.items" :key="blog.id">
         <td>{{index}}</td>
         <td @click="selectedTitle(index)">{{blog.title}}</td>
       </tr>
