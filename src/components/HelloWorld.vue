@@ -1,6 +1,5 @@
 <template>
   <div class="">
-    <button @click="pre">pre</button>
     <button @click="next">next</button>
     <input type="text" v-model="titleKeyword">
     <button @click="search">search</button>
@@ -75,17 +74,8 @@ export default {
     };
   },
   methods: {
-    pre(){
-      if(this.pageNum > 0){
-        this.pageNum--;
-        let start = this.pageNum * this.limit;
-        let end = (this.pageNum * this.limit) + this.limit;
-        this.currentBlogs = this.listBlogs.items.slice(start, end);
-      }
-    },
     next() {
       if(this.listBlogs.nextToken != null){ 
-        this.pageNum++;
         this.$apollo.queries.listBlogs.fetchMore({
           variables: {
             limit: this.limit,
@@ -132,7 +122,7 @@ export default {
           update: (store, { data: { createBlog }}) => {
             const allBlogs = {
               query: LIST_BLOGS,
-              variables: {filter: null, limit: 5, nextToken: null}
+              variables: {filter: null, limit: this.listBlogs.items.size(), nextToken: null}
             }
             const data = store.readQuery(allBlogs)
             data.listBlogs.items.push(createBlog)
@@ -217,9 +207,7 @@ export default {
         };
       },
       result({data, loading, networkStatus}){
-        let start = this.pageNum * this.limit;
-        let end = (this.pageNum * this.limit) + this.limit;
-        this.currentBlogs = data.listBlogs.items.slice(start, end)
+
       },
       subscribeToMore: {
         document: ON_CREATE_BLOG,
