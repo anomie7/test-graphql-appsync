@@ -13,7 +13,7 @@
         <td>index</td>
         <td>title</td>
       </th>
-      <tr v-for="(blog, index) in listBlogs.items" :key="blog.id">
+      <tr v-for="(blog, index) in currentBlogs" :key="blog.id">
         <td>{{index}}</td>
         <td @click="selectedTitle(index)">{{blog.title}}</td>
       </tr>
@@ -56,8 +56,9 @@ export default {
   data() {
     return {
       limit: 5,
+      pageNum: 0,
       selectedId: '1',
-      previousBlogs: new Array(),
+      currentBlogs: new Array(),
       titleKeyword: '',
       titleFilter: {title: {contains: null} },
       searchFilter: null,
@@ -69,16 +70,40 @@ export default {
         title: '',
         content: '',
         rating: 0.0
-      }
+      },
+      done: false
     };
   },
   methods: {
     pre(){
-      //this.$apollo.queries.tagsPage.fetchMore
+      if(this.pageNum > 0){
+        this.pageNum--;
+        let start = this.pageNum * this.limit;
+        let end = (this.pageNum * this.limit) + this.limit;
+        this.currentBlogs = this.listBlogs.items.slice(start, end);
+      }
     },
     next() {
-      this.previousBlogs.push(...this.listBlogs.items);
-      this.nextToken = this.listBlogs.nextToken;
+      if(this.listBlogs.nextToken != null){ 
+        this.pageNum++;
+        this.$apollo.queries.listBlogs.fetchMore({
+          variables: {
+            limit: this.limit,
+            nextToken: this.listBlogs.nextToken
+          },
+          updateQuery: (previousResult, {fetchMoreResult}) => {
+            const newBlogs = fetchMoreResult.listBlogs.items;
+            const nextToken = fetchMoreResult.listBlogs.nextToken;
+            return {
+              listBlogs: {
+                __typename: previousResult.listBlogs.__typename,
+                items: [...previousResult.listBlogs.items, ...newBlogs],
+                nextToken
+              }
+            }
+          }
+        })
+      }
     },
     search(){
       if(this.titleKeyword == ""){
@@ -142,6 +167,16 @@ export default {
             approved: true
           },
           update: (store, {data: {updateBlog}}) => {
+            const allBlogs = {
+              query: LIST_BLOGS,
+              variables: {filter: null, limit: 5, nextToken: this.listBlogs.nextToken},
+              result: ({data, loading, networkStatus}) => {}
+            }
+            const data = store.readQuery(allBlogs)
+            const result = data.listBlogs.items.findIndex( item => item.id == updateBlog.id);
+            this.listBlogs.items[result] = updateBlog;
+            store.writeQuery({...allBlogs, data})
+
             const selectedBlog = {
               query: getBlog,
               variables: {
@@ -149,7 +184,7 @@ export default {
               }
             }
 
-            const data = store.readQuery(selectedBlog);
+            data = store.readQuery(selectedBlog);
             data.getBlog = updateBlog
             store.writeQuery({...selectedBlog, data})
           },
@@ -180,6 +215,11 @@ export default {
           limit: this.limit,
           nextToken: this.nextToken
         };
+      },
+      result({data, loading, networkStatus}){
+        let start = this.pageNum * this.limit;
+        let end = (this.pageNum * this.limit) + this.limit;
+        this.currentBlogs = data.listBlogs.items.slice(start, end)
       },
       subscribeToMore: {
         document: ON_CREATE_BLOG,

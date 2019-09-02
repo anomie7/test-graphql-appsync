@@ -9,10 +9,25 @@ import HelloWorld from "./components/HelloWorld.vue";
 
 export default {
   name: "app",
-  data: () => ({ hydrated: false }),
+  data: () => ({ 
+    hydrated: false,
+    currentUserInfo: null
+    }),
   mounted() {
     this.$apollo.provider.defaultClient.hydrated();
     this.hydrated = true;
+    let urlString = window.location.href;
+    let url = new URL(urlString)
+    let obj = url.searchParams.get("currentUserInfo")
+    let curInfo = JSON.parse(obj);
+    let currentUserInfo = {
+      memberNum: url.searchParams.get("mNum"),
+      participationNum: url.searchParams.get("pNum"),
+    };
+    this.currentUserInfo = currentUserInfo;
+    console.log(this.currentUserInfo.memberNum);
+    console.log(this.currentUserInfo.participationNum);
+    console.log(curInfo);
   },
   components: {
     HelloWorld
