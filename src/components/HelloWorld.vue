@@ -120,13 +120,7 @@ export default {
             rating: newBlog.rating,
           },
           update: (store, { data: { createBlog }}) => {
-            const allBlogs = {
-              query: LIST_BLOGS,
-              variables: {filter: null, limit: this.listBlogs.items.size() + 1, nextToken: null}
-            }
-            const data = store.readQuery(allBlogs)
-            data.listBlogs.items.push(createBlog)
-            store.writeQuery({...allBlogs, data})
+
           },
           optimisticResponse: {
             __typename: 'Mutation',
@@ -157,16 +151,6 @@ export default {
             approved: true
           },
           update: (store, {data: {updateBlog}}) => {
-            const allBlogs = {
-              query: LIST_BLOGS,
-              variables: {filter: null, limit: 5, nextToken: this.listBlogs.nextToken},
-              result: ({data, loading, networkStatus}) => {}
-            }
-            const data = store.readQuery(allBlogs)
-            const result = data.listBlogs.items.findIndex( item => item.id == updateBlog.id);
-            this.listBlogs.items[result] = updateBlog;
-            store.writeQuery({...allBlogs, data})
-
             const selectedBlog = {
               query: getBlog,
               variables: {
@@ -174,7 +158,7 @@ export default {
               }
             }
 
-            data = store.readQuery(selectedBlog);
+            const data = store.readQuery(selectedBlog);
             data.getBlog = updateBlog
             store.writeQuery({...selectedBlog, data})
           },
@@ -212,8 +196,18 @@ export default {
       subscribeToMore: {
         document: ON_CREATE_BLOG,
         result: (data) => { 
-          console.log('subscription create blog')
-          console.log(data)}
+          console.log('subscription success create blog')
+          console.log(data.listBlogs)},
+        updateQuery: (previousResult, {subscriptionData }) => {
+            let nextToken = previousResult.listBlogs.nextToken
+            return {
+              listBlogs: {
+                __typename: previousResult.listBlogs.__typename,
+                items: [...previousResult.listBlogs.items, subscriptionData.data.addedBlog],
+                nextToken
+              }
+            }
+          }
       }
     },
     selectedBlog: {
