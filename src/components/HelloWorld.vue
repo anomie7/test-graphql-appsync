@@ -122,7 +122,7 @@ export default {
           update: (store, { data: { createBlog }}) => {
             const allBlogs = {
               query: LIST_BLOGS,
-              variables: {filter: null, limit: this.listBlogs.items.size(), nextToken: null}
+              variables: {filter: null, limit: this.listBlogs.items.size() + 1, nextToken: null}
             }
             const data = store.readQuery(allBlogs)
             data.listBlogs.items.push(createBlog)

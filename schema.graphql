@@ -1,0 +1,119 @@
+﻿schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+type Blog {
+  approved: Boolean
+  content: String
+  id: ID!
+  rating: Float
+  title: String!
+}
+
+type BlogConnection {
+  items: [Blog]
+  nextToken: String
+}
+
+type Mutation {
+  createBlog(input: CreateBlogInput!): Blog
+  deleteBlog(input: DeleteBlogInput!): Blog
+  updateBlog(input: UpdateBlogInput!): Blog
+}
+
+type Query {
+  getBlog(id: ID!): Blog
+  listBlogs(filter: TableBlogFilterInput, limit: Int, nextToken: String): BlogConnection
+  queryBlogsByRating(after: String, first: Int, rating: Float!): BlogConnection
+}
+
+type Subscription {
+  addedBlog: Blog @aws_subscribe(mutations : ["createBlog"])
+  onCreateBlog(approved: Boolean, content: String, id: ID, rating: Float, title: String): Blog @aws_subscribe(mutations : ["createBlog"])
+  onDeleteBlog(approved: Boolean, content: String, id: ID, rating: Float, title: String): Blog @aws_subscribe(mutations : ["deleteBlog"])
+  onUpdateBlog(approved: Boolean, content: String, id: ID, rating: Float, title: String): Blog @aws_subscribe(mutations : ["updateBlog"])
+}
+
+input CreateBlogInput {
+  approved: Boolean
+  content: String
+  rating: Float
+  title: String!
+}
+
+input DeleteBlogInput {
+  id: ID!
+}
+
+input TableBlogFilterInput {
+  approved: TableBooleanFilterInput
+  content: TableStringFilterInput
+  id: TableIDFilterInput
+  rating: TableFloatFilterInput
+  title: TableStringFilterInput
+}
+
+input TableBooleanFilterInput {
+  eq: Boolean
+  ne: Boolean
+}
+
+input TableFloatFilterInput {
+  between: [Float]
+  contains: Float
+  eq: Float
+  ge: Float
+  gt: Float
+  le: Float
+  lt: Float
+  ne: Float
+  notContains: Float
+}
+
+input TableIDFilterInput {
+  beginsWith: ID
+  between: [ID]
+  contains: ID
+  eq: ID
+  ge: ID
+  gt: ID
+  le: ID
+  lt: ID
+  ne: ID
+  notContains: ID
+}
+
+input TableIntFilterInput {
+  between: [Int]
+  contains: Int
+  eq: Int
+  ge: Int
+  gt: Int
+  le: Int
+  lt: Int
+  ne: Int
+  notContains: Int
+}
+
+input TableStringFilterInput {
+  beginsWith: String
+  between: [String]
+  contains: String
+  eq: String
+  ge: String
+  gt: String
+  le: String
+  lt: String
+  ne: String
+  notContains: String
+}
+
+input UpdateBlogInput {
+  approved: Boolean
+  content: String
+  id: ID!
+  rating: Float
+  title: String
+}
